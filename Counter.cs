@@ -1,38 +1,46 @@
 using UnityEngine;
-using TMPro;
+using System;
 using System.Collections;
 
 public class Counter : MonoBehaviour
 {
-    private bool _isCounting = false;
     private float _count = 0f;
-    public TextMeshProUGUI CounterText;
+    private WaitForSeconds _waitTime;
+    private Coroutine _countingCoroutine;
+
+    [SerializeField] private float _updateInterval = 0.5f;
+
+    public event Action<float> OnCounterUpdated;
+
+    private void Start()
+    {
+        _waitTime = new WaitForSeconds(_updateInterval);
+    }
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            _isCounting = !_isCounting;
-
-            if (_isCounting)
+            if (_countingCoroutine != null)
             {
-                StartCoroutine(StartCounting());
+                StopCoroutine(_countingCoroutine);
+                _countingCoroutine = null;
             }
             else
             {
-                StopCoroutine(StartCounting());
+                _countingCoroutine = StartCoroutine(StartCounting());
             }
         }
     }
 
     private IEnumerator StartCounting()
     {
-        while (_isCounting)
+        while (true)
         {
             _count++;
-            CounterText.text = "Ñ÷¸ò÷èê: " + _count.ToString();
+            OnCounterUpdated?.Invoke(_count);    
 
-            yield return new WaitForSeconds(0.5f);
+            yield return _waitTime;
         }
     }
 }
