@@ -35,7 +35,7 @@ public class Counter : MonoBehaviour
 
     private IEnumerator StartCounting()
     {
-        while (true)
+        while (enabled)
         {
             _count++;
             OnCounterUpdated?.Invoke(_count);    
