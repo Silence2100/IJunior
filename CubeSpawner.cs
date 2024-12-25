@@ -2,14 +2,28 @@ using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
 {
-    [Header("Настройки спавна")]
-    [SerializeField] private GameObject _cubePrefab;
-    [SerializeField] private int _minCubes = 2;
-    [SerializeField] private int _maxCubes = 6;
-    [SerializeField] private float _scaleMultiplier = 0.5f;
-    [SerializeField] private float _spawnRadius = 0.5f;
-    [SerializeField] private bool _randomizeColor = true;
-    [SerializeField] private float _splitChanceDecay = 0.5f;
+    [Header("Настройка новых кубов")]
+    [SerializeField, Tooltip("Префаб куба, который будет создаваться")]
+    private GameObject _cubePrefab;
+
+    [SerializeField, Tooltip("Минимальное количество новых кубов")]
+    [Range(1, 10)] private int _minCubes = 2;
+
+    [SerializeField, Tooltip("Максимальное количество новых кубов")]
+    [Range(1, 10)] private int _maxCubes = 6;
+
+    [SerializeField, Tooltip("Множитель уменьшения размера нового куба")]
+    [Range(0.1f, 1f)] private float _scaleMultiplier = 0.5f;
+
+    [SerializeField, Tooltip("Радиус появления новых кубов вокруг исчезающего")]
+    [Range(0.1f, 5f)] private float _spawnRadius = 0.5f;
+
+    [Header("Настройка цвета")]
+    [SerializeField, Tooltip("Включить случайные цвета для новых кубов")]
+    private bool _randomizeColor = true;
+
+    [SerializeField, Tooltip("Снижение шанса разделения с каждым поколением")]
+    [Range(0.1f, 2f)] private float _splitChanceDecay = 0.5f;
 
     private ExplosionHandler _explosionHandler;
 

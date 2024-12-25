@@ -2,10 +2,13 @@ using UnityEngine;
 
 public class Cube : MonoBehaviour
 {
+    private const float MaxSplitChance = 100f;
+
     private float _currentSplitChance;
     private CubeSpawner _spawner;
 
-    [SerializeField, Tooltip("Начальный шанс разделения для этого куба (в процентах)")]
+    [Header("Шанс разделения")]
+    [SerializeField, Tooltip("Начальный шанс разделения (в процентах)")]
     [Range(0f, 100f)] private float _initialSplitChance = 100f;
 
     private void Start()
@@ -22,7 +25,7 @@ public class Cube : MonoBehaviour
     {
         Debug.Log($"Текущий шанс разделения: {_currentSplitChance}%");
 
-        if (Random.value > _currentSplitChance / 100f)
+        if (Random.value > _currentSplitChance / MaxSplitChance)
         {
             Destroy(gameObject);
             return;

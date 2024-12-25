@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class ExplosionHandler : MonoBehaviour
 {
-    [Header("Настройки взрыва")]
+    [Header("Настройка взрыва")]
     [SerializeField, Tooltip("Сила взрыва")]
-    private float _explosionForce = 10f;
+    [Range(0f, 50f)] private float _explosionForce = 10f;
 
     public void ApplyExplosionForce(GameObject cube, Vector3 explosionOrigin)
     {
