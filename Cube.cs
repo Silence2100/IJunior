@@ -1,47 +1,38 @@
+using System;
 using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody), typeof(Renderer))]
 
 public class Cube : MonoBehaviour
 {
-    private const float MaxSplitChance = 100f;
+    public event Action<Cube> OnClicked;
 
-    private float _currentSplitChance;
-    private CubeSpawner _spawner;
+    private Renderer _renderer;
+    private float _splitChanceDecay = 2.0f;
 
-    [Header("Шанс разделения")]
-    [SerializeField, Tooltip("Начальный шанс разделения (в процентах)")]
-    [Range(0f, 100f)] private float _initialSplitChance = 100f;
+    public float CurrentChance { get; private set; } = 1.0f;
+    public Rigidbody Rigidbody { get; private set; }
 
-    private void Start()
+    private void Awake()
     {
-        if (_currentSplitChance == 0)
-        {
-            _currentSplitChance = _initialSplitChance;
-        }
-
-        _spawner = FindObjectOfType<CubeSpawner>();
+        Rigidbody = GetComponent<Rigidbody>();
+        _renderer = GetComponent<Renderer>();
     }
 
-    private void OnMouseDown()
+    public void OnMouseDown()
     {
-        Debug.Log($"Текущий шанс разделения: {_currentSplitChance}%");
-
-        if (Random.value > _currentSplitChance / MaxSplitChance)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        if (_spawner != null)
-        {
-            _spawner.SpawnCubes(transform.position, transform.localScale, _currentSplitChance);
-        }
+        OnClicked?.Invoke(this);
 
         Destroy(gameObject);
     }
 
-    public void Initialize(float initialSplitChance, CubeSpawner spawner)
+    public void ChangeColor()
     {
-        _currentSplitChance = initialSplitChance;
-        _spawner = spawner;
+        _renderer.material.color = UnityEngine.Random.ColorHSV();
+    }
+
+    public void ReduceChance(float chance)
+    {
+        CurrentChance = chance / _splitChanceDecay;
     }
 }

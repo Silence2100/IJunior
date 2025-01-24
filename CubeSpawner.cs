@@ -1,73 +1,63 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
 {
-    [Header("Настройка новых кубов")]
-    [SerializeField, Tooltip("Префаб куба, который будет создаваться")]
-    private GameObject _cubePrefab;
+    [SerializeField] private Cube _cubePrefab;
+    [SerializeField] private List<Cube> _listCubes;
 
-    [SerializeField, Tooltip("Минимальное количество новых кубов")]
-    [Range(1, 10)] private int _minCubes = 2;
+    private CubeExplosion _explosion;
 
-    [SerializeField, Tooltip("Максимальное количество новых кубов")]
-    [Range(1, 10)] private int _maxCubes = 6;
-
-    [SerializeField, Tooltip("Множитель уменьшения размера нового куба")]
-    [Range(0.1f, 1f)] private float _scaleMultiplier = 0.5f;
-
-    [SerializeField, Tooltip("Радиус появления новых кубов вокруг исчезающего")]
-    [Range(0.1f, 5f)] private float _spawnRadius = 0.5f;
-
-    [Header("Настройка цвета")]
-    [SerializeField, Tooltip("Включить случайные цвета для новых кубов")]
-    private bool _randomizeColor = true;
-
-    [SerializeField, Tooltip("Снижение шанса разделения с каждым поколением")]
-    [Range(0.1f, 2f)] private float _splitChanceDecay = 0.5f;
-
-    private ExplosionHandler _explosionHandler;
+    private int _minCubes = 2;
+    private int _maxCubes = 6;
+    private float _scaleFactor = 0.5f;
+    private float _cubeSpawnRadiusMultiplier = 0.1f;
 
     private void Awake()
     {
-        _explosionHandler = GetComponent<ExplosionHandler>();
+        _explosion = GetComponent<CubeExplosion>();
     }
 
-    public void SpawnCubes(Vector3 origin, Vector3 parentScale, float currentSplitChance)
+    private void Start()
     {
-        int cubeCount = Random.Range(_minCubes, _maxCubes + 1);
+        foreach (var cube in _listCubes)
+            cube.OnClicked += OnCubeDestroyed;
+    }
 
-        for (int i = 0; i < cubeCount; i++)
+    public void SpawnCubes(Cube cube)
+    {
+        Debug.Log("Шанс деления: " + cube.CurrentChance);
+
+        int newCubesCount = Random.Range(_minCubes, _maxCubes + 1);
+
+        if (Random.value < cube.CurrentChance)
         {
-            Vector3 spawnPosition = origin + Random.insideUnitSphere * _spawnRadius;
-
-            GameObject newCube = Instantiate(_cubePrefab, spawnPosition, Quaternion.identity);
-            newCube.transform.localScale = parentScale * _scaleMultiplier;
-
-            if (_randomizeColor)
+            for (int i = 0; i < newCubesCount; i++)
             {
-                Renderer renderer = newCube.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    renderer.material.color = GetRandomColor();
-                }
-            }
+                Vector3 spawnPosition = cube.transform.position + Random.insideUnitSphere * _cubeSpawnRadiusMultiplier;
 
-            if (_explosionHandler != null)
-            {
-                _explosionHandler.ApplyExplosionForce(newCube, origin);
-            }
+                Cube newCube = Instantiate(_cubePrefab, spawnPosition, Quaternion.identity);
 
-            Cube cube = newCube.GetComponent<Cube>();
+                newCube.transform.localScale = cube.transform.localScale * _scaleFactor;
 
-            if (cube != null)
-            {
-                cube.Initialize(currentSplitChance * _splitChanceDecay, this);
+                newCube.ChangeColor();
+
+                newCube.ReduceChance(cube.CurrentChance);
+
+                _explosion.ApplyExplosionForce(newCube);
+
+                newCube.OnClicked += OnCubeDestroyed;
             }
+        }
+        else
+        {
+            Destroy(cube);
         }
     }
 
-    private Color GetRandomColor()
+    private void OnCubeDestroyed(Cube cube)
     {
-        return new Color(Random.value, Random.value, Random.value);
+        SpawnCubes(cube);
+        cube.OnClicked -= OnCubeDestroyed;
     }
 }
