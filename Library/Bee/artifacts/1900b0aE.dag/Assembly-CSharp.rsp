@@ -400,9 +400,8 @@
 -analyzer:"G:/Unity/6000.0.32f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 -analyzer:"G:/Unity/6000.0.32f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll"
 "Assets/Scripts/Cube.cs"
-"Assets/Scripts/CubeExplosion.cs"
+"Assets/Scripts/CubePool.cs"
 "Assets/Scripts/CubeSpawner.cs"
-"Assets/Scripts/Explosion.cs"
 -langversion:9.0
 /deterministic
 /optimize+

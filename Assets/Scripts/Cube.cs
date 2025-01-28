@@ -1,38 +1,44 @@
 using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody), typeof(Renderer))]
+[RequireComponent(typeof(Renderer), typeof(Rigidbody))]
 
 public class Cube : MonoBehaviour
 {
-    public event Action<Cube> OnClicked;
+    public event Action<Cube> OnTouchedPlatform;
 
-    private Renderer _renderer;
-    private float _splitChanceDecay = 2.0f;
+    private bool _hasTouched = false;
+    private Color _originalColor;
 
-    public float CurrentChance { get; private set; } = 1.0f;
+    public Renderer Renderer { get; private set; }
     public Rigidbody Rigidbody { get; private set; }
 
     private void Awake()
     {
         Rigidbody = GetComponent<Rigidbody>();
-        _renderer = GetComponent<Renderer>();
+        Renderer = GetComponent<Renderer>();
+        _originalColor = Renderer.material.color;
     }
 
-    public void OnMouseDown()
+    private void OnCollisionEnter(Collision collision)
     {
-        OnClicked?.Invoke(this);
+        if (!_hasTouched && collision.collider.CompareTag("Platform"))
+        {
+            _hasTouched = true;
+            ChangeColor();
 
-        Destroy(gameObject);
+            OnTouchedPlatform?.Invoke(this);
+        }
     }
 
-    public void ChangeColor()
+    private void ChangeColor()
     {
-        _renderer.material.color = UnityEngine.Random.ColorHSV();
+        Renderer.material.color = UnityEngine.Random.ColorHSV();
     }
 
-    public void ReduceChance(float chance)
+    public void ResetCube()
     {
-        CurrentChance = chance / _splitChanceDecay;
+        _hasTouched = false;
+        Renderer.material.color = _originalColor;
     }
 }

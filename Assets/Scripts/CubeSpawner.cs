@@ -1,67 +1,61 @@
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class CubeSpawner : MonoBehaviour
 {
-    [SerializeField] private Cube _cubePrefab;
-    [SerializeField] private List<Cube> _listCubes;
+    [SerializeField] private CubePool _cubePool;
+    [SerializeField] private Transform _spawnArea;
+    [SerializeField] private float _spawnInterval = 0.2f;
 
-    private CubeExplosion _cubeExplosion;
-    private Explosion _explosion;
+    private float _minLifeTime = 2f;
+    private float _maxLifeTime = 5f;
 
-    private int _minCubes = 2;
-    private int _maxCubes = 40;
-    private float _scaleFactor = 0.5f;
-    private float _cubeSpawnRadiusMultiplier = 0.1f;
+    private float _multiplierSpawnCubes = 2f;
+    private float _heightSpawnCubes = 30f;
 
-    private void Awake()
+    private float _timer = 0f;
+
+    private void Update()
     {
-        _cubeExplosion = GetComponent<CubeExplosion>();
-        _explosion = GetComponent<Explosion>();
-    }
+        _timer += Time.deltaTime;
 
-    private void Start()
-    {
-        foreach (var cube in _listCubes)
-            cube.OnClicked += OnCubeDestroyed;
-    }
-
-    public void SpawnCubes(Cube cube)
-    {
-        Debug.Log("Шанс деления: " + cube.CurrentChance);
-
-        int newCubesCount = Random.Range(_minCubes, _maxCubes + 1);
-
-        if (Random.value < cube.CurrentChance)
+        if (_timer >= _spawnInterval)
         {
-            for (int i = 0; i < newCubesCount; i++)
-            {
-                Vector3 spawnPosition = cube.transform.position + Random.insideUnitSphere * _cubeSpawnRadiusMultiplier;
-
-                Cube newCube = Instantiate(_cubePrefab, spawnPosition, Quaternion.identity);
-
-                newCube.transform.localScale = cube.transform.localScale * _scaleFactor;
-
-                newCube.ChangeColor();
-
-                newCube.ReduceChance(cube.CurrentChance);
-
-                _cubeExplosion.ApplyExplosionForce(newCube);
-
-                newCube.OnClicked += OnCubeDestroyed;
-            }
-        }
-        else
-        {
-            _explosion.HandleExplosion(cube.transform.position, cube.transform.localScale.x);
-
-            Destroy(cube);
+            SpawnCube();
+            _timer = 0f;
         }
     }
 
-    private void OnCubeDestroyed(Cube cube)
+    private void SpawnCube()
     {
-        SpawnCubes(cube);
-        cube.OnClicked -= OnCubeDestroyed;
+        GameObject cubeObject = _cubePool.GetCube();
+        Cube cube = cubeObject.GetComponent<Cube>();
+
+        cube.OnTouchedPlatform += HandleCubeTouch;
+
+        Vector3 spawnPosition = new Vector3(
+            Random.Range(_spawnArea.position.x - _spawnArea.localScale.x * _multiplierSpawnCubes, _spawnArea.position.x + _spawnArea.localScale.x * _multiplierSpawnCubes),
+            _spawnArea.position.y + _heightSpawnCubes,
+            Random.Range(_spawnArea.position.z - _spawnArea.localScale.z * _multiplierSpawnCubes, _spawnArea.position.z + _spawnArea.localScale.z * _multiplierSpawnCubes)
+        );
+
+        cubeObject.transform.position = spawnPosition;
+        cubeObject.transform.rotation = Quaternion.identity;
+
+        cube.ResetCube();
+    }
+
+    private void HandleCubeTouch(Cube cube)
+    {
+        float lifeTime = Random.Range(_minLifeTime, _maxLifeTime + 1);
+        StartCoroutine(DestroyCubeAfterDelay(cube, lifeTime));
+    }
+
+    private IEnumerator DestroyCubeAfterDelay(Cube cube, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        cube.OnTouchedPlatform -= HandleCubeTouch;
+        _cubePool.ReturnCube(cube.gameObject);
     }
 }

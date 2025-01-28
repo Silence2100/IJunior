@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{84174D7D-7DCC-4544-112F-78637EC20626}</ProjectGuid>
+    <ProjectGuid>{E1D93751-0CE3-523A-2F68-36976FFFB734}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -61,9 +61,8 @@
     <Analyzer Include="G:\Unity\6000.0.32f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\CubePool.cs" />
     <Compile Include="Assets\Scripts\CubeSpawner.cs" />
-    <Compile Include="Assets\Scripts\Explosion.cs" />
-    <Compile Include="Assets\Scripts\CubeExplosion.cs" />
     <Compile Include="Assets\Scripts\Cube.cs" />
   </ItemGroup>
   <ItemGroup>
