@@ -1,41 +1,32 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class CubePool : MonoBehaviour
 {
     [SerializeField] private GameObject _cubePrefab;
     [SerializeField] private int _poolSize = 20;
 
-    private Queue<GameObject> _pool = new Queue<GameObject>();
+    private ObjectPool<GameObject> _cubePool;
 
-    private void Start()
+    private void Awake()
     {
-        for (int i = 0; i < _poolSize; i++)
-        {
-            GameObject cube = Instantiate(_cubePrefab);
-            cube.SetActive(false);
-            _pool.Enqueue(cube);
-        }
+        _cubePool = new ObjectPool<GameObject> (
+            createFunc: () => Instantiate(_cubePrefab),
+            actionOnGet: cube => cube.SetActive(true),
+            actionOnRelease: cube => cube.SetActive(false),
+            actionOnDestroy: cube => Destroy(cube),
+            maxSize: _poolSize
+        );
     }
 
     public GameObject GetCube()
     {
-        if (_pool.Count > 0)
-        {
-            GameObject cube = _pool.Dequeue();
-            cube.SetActive(true);
-            return cube;
-        }
-        else
-        {
-            GameObject cube = Instantiate(_cubePrefab);
-            return cube;
-        }
+        return _cubePool.Get();
     }
 
     public void ReturnCube(GameObject cube)
     {
-        cube.SetActive(false);
-        _pool.Enqueue(cube);
+        _cubePool.Release(cube);
     }
 }
