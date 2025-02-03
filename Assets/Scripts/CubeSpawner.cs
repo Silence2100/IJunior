@@ -28,10 +28,8 @@ public class CubeSpawner : MonoBehaviour
 
     private void SpawnCube()
     {
-        GameObject cubeObject = _cubePool.GetCube();
-        Cube cube = cubeObject.GetComponent<Cube>();
-
-        cube.OnTouchedPlatform += HandleCubeTouch;
+        Cube cube = _cubePool.GetCube();
+        cube.TouchedPlatform += HandleCubeTouch;
 
         Vector3 spawnPosition = new Vector3(
             Random.Range(_spawnArea.position.x - _spawnArea.localScale.x * _multiplierSpawnCubes, _spawnArea.position.x + _spawnArea.localScale.x * _multiplierSpawnCubes),
@@ -39,8 +37,8 @@ public class CubeSpawner : MonoBehaviour
             Random.Range(_spawnArea.position.z - _spawnArea.localScale.z * _multiplierSpawnCubes, _spawnArea.position.z + _spawnArea.localScale.z * _multiplierSpawnCubes)
         );
 
-        cubeObject.transform.position = spawnPosition;
-        cubeObject.transform.rotation = Quaternion.identity;
+        cube.transform.position = spawnPosition;
+        cube.transform.rotation = Quaternion.identity;
 
         cube.ResetCube();
     }
@@ -55,7 +53,7 @@ public class CubeSpawner : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        cube.OnTouchedPlatform -= HandleCubeTouch;
-        _cubePool.ReturnCube(cube.gameObject);
+        cube.TouchedPlatform -= HandleCubeTouch;
+        _cubePool.ReturnCube(cube);
     }
 }

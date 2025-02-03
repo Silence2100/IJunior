@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class Cube : MonoBehaviour
 {
-    public event Action<Cube> OnTouchedPlatform;
-
     private bool _hasTouched = false;
     private Color _originalColor;
+
+    public event Action<Cube> TouchedPlatform;
 
     public Renderer Renderer { get; private set; }
     public Rigidbody Rigidbody { get; private set; }
@@ -22,23 +22,23 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (!_hasTouched && collision.collider.CompareTag("Platform"))
+        if (!_hasTouched && collision.collider.GetComponent<Platform>() != null)
         {
             _hasTouched = true;
             ChangeColor();
 
-            OnTouchedPlatform?.Invoke(this);
+            TouchedPlatform?.Invoke(this);
         }
-    }
-
-    private void ChangeColor()
-    {
-        Renderer.material.color = UnityEngine.Random.ColorHSV();
     }
 
     public void ResetCube()
     {
         _hasTouched = false;
         Renderer.material.color = _originalColor;
+    }
+
+    private void ChangeColor()
+    {
+        Renderer.material.color = UnityEngine.Random.ColorHSV();
     }
 }
